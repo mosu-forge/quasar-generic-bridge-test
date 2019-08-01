@@ -1,11 +1,14 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
+const path = require('path')
+
 module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     boot: [
+      'bridge'
     ],
 
     css: [
@@ -28,7 +31,7 @@ module.exports = function (ctx) {
       // iconSet: 'ionicons-v4',
       // lang: 'de', // Quasar language
 
-      // all: true, // --- includes everything; for dev only!
+      all: true, // --- includes everything; for dev only!
 
       components: [
         'QLayout',
@@ -66,6 +69,10 @@ module.exports = function (ctx) {
       // analyze: true,
       // extractCSS: false,
       extendWebpack (cfg) {
+      },
+      chainWebpack(cfg) {
+        cfg.resolve.alias
+          .set('bridge', path.resolve(__dirname, './src/bridge'))
       }
     },
 

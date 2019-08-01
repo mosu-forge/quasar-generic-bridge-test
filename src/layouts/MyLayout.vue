@@ -36,13 +36,13 @@
             <q-item-label caption>Main page</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item clickable to="/secondary">
+        <q-item clickable to="/component">
           <q-item-section avatar>
             <q-icon name="dashboard" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Secondary</q-item-label>
-            <q-item-label caption>Another page</q-item-label>
+            <q-item-label>Component</q-item-label>
+            <q-item-label caption>Component as reciever</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
