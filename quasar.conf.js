@@ -2,13 +2,15 @@
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
 const path = require('path')
+const WorkerPlugin = require('worker-plugin')
 
 module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     boot: [
-      'bridge'
+      'bridge',
+      'worker-prime'
     ],
 
     css: [
@@ -73,6 +75,8 @@ module.exports = function (ctx) {
       chainWebpack(cfg) {
         cfg.resolve.alias
           .set('bridge', path.resolve(__dirname, './src/bridge'))
+          .set('workers', path.resolve(__dirname, './src/workers'))
+        cfg.plugin('worker').use(WorkerPlugin, [{ globalObject: 'self' }])
       }
     },
 

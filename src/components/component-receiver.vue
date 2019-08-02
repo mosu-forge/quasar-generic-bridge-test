@@ -22,7 +22,7 @@ export default {
 
     // this check is optional, but if you want to be sure nobody has
     // removed your receiver and added their own, you can check this
-    if(this.$q.broker.validateReceiver('MyComponent', this)) {
+    if(this.$q.broker.compareReceiver('MyComponent', this)) {
       this.messages.push('Correctly registered receiver')
     } else {
       this.messages.push('This is not the receiver you\'re looking for')

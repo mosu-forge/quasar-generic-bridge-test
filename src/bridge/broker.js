@@ -1,28 +1,86 @@
 import { BridgeBase } from '.'
-import { uid } from 'quasar'
-import Vue from 'vue'
+import { uid } from './utils'
+// import Vue from 'vue'
 
 class Broker {
   constructor() {
     this.receivers = new Map()
     this.promises = new Map()
+    this.bridges = new Map()
   }
 
+  /* Bridge Functions */
+  registerBridge(bridge_name, bridge) {
+    if(this.bridges.has(bridge_name)) {
+      throw new Error('Named bridge already exists')
+    }
+    if(!bridge.prototype instanceof BridgeBase) {
+      throw new Error('Bridge does not inherit BridgeBase')
+    }
+    if(!this.validateBridge(bridge)) {
+      throw new Error('Bridge does not implement correct functions')
+    }
+    this.bridges.set(bridge_name, bridge)
+  }
+
+  deregisterBridge(bridge_name) {
+    if(!this.bridges.has(target_name)) {
+      throw new Error('Named bridge does not exist')
+    }
+    this.bridges.delete(bridge_name)
+  }
+
+  getBridge(bridge_name) {
+    if(!this.bridges.has(bridge_name)) {
+      throw new Error('Named bridge does not exist')
+    }
+    return this.bridges.get(bridge_name)
+  }
+
+  validateBridge(bridge) {
+    return typeof bridge.send === 'function'
+  }
+
+  compareBridge(bridge_name, bridge) {
+    if(!this.bridges.has(bridge_name)) {
+      return false
+    }
+    return bridge === this.bridges.get(bridge_name)
+  }
+
+  /* Receiver Functions */
   registerReceiver(target_name, target) {
     if(this.receivers.has(target_name)) {
       throw new Error('Named target already exists')
     }
-    if(target.prototype instanceof BridgeBase) {
+    if(typeof target === 'string' || target instanceof String) {
+      if(!this.bridges.has(target)) {
+        throw new Error('Named bridge does not exist')
+      }
+      this.receivers.set(target_name, {
+        bridge: this.bridges.get(target),
+        type: 'remote'
+      })
+    } else if(target.prototype instanceof BridgeBase) {
+      if(!this.validateBridge(target)) {
+        throw new Error('Bridge does not implement correct functions')
+      }
       this.receivers.set(target_name, {
         bridge: target,
         type: 'remote'
       })
-    } else if(target instanceof Vue) {
+    } else if(target._isVue) { // or if(target instanceof Vue)
+      if(!this.validateReceiver(target)) {
+        throw new Error('Receiver does not implement correct functions')
+      }
       this.receivers.set(target_name, {
         target: target,
         type: 'vue'
       })
-     } else {
+    } else {
+      if(!this.validateReceiver(target)) {
+        throw new Error('Receiver does not implement correct functions')
+      }
       this.receivers.set(target_name, {
         target,
         type: 'local'
@@ -37,7 +95,18 @@ class Broker {
     this.receivers.delete(target_name)
   }
 
-  validateReceiver(target_name, target) {
+  getReceiver(target_name) {
+    if(!this.receivers.has(target_name)) {
+      throw new Error('Named target does not exist')
+    }
+    return this.receivers.get(target_name)
+  }
+
+  validateReceiver(target) {
+    return typeof target.receive === 'function' && typeof target.receivePromise === 'function'
+  }
+
+  compareReceiver(target_name, target) {
     if(!this.receivers.has(target_name)) {
       return false
     }
