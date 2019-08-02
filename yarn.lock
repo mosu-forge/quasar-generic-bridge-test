@@ -7456,10 +7456,9 @@ worker-farm@^1.7.0:
   dependencies:
     errno "~0.1.7"
 
-worker-plugin@^3.1.0:
+worker-plugin@alan-agius4/worker-plugin#worker-id-multiple:
   version "3.1.0"
-  resolved "https://registry.yarnpkg.com/worker-plugin/-/worker-plugin-3.1.0.tgz#6311778f3514a87c273510ee3f809cc3fe161e6f"
-  integrity sha512-iQ9KTTmmN5fhfc2KMR7CcDblvcrg1QQ4pXymqZ3cRZF8L0890YLBcEqlIsGPdxoFwghyN8RA1pCEhCKuTF4Lkw==
+  resolved "https://codeload.github.com/alan-agius4/worker-plugin/tar.gz/c918693484adc7c4aa13b6920dadb3f164d032dd"
   dependencies:
     loader-utils "^1.1.0"
 

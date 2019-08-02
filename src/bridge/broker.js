@@ -14,7 +14,7 @@ class Broker {
     if(this.bridges.has(bridge_name)) {
       throw new Error(`Bridge ${bridge_name} already exists`)
     }
-    if(!bridge.prototype instanceof BridgeBase) {
+    if(!(bridge instanceof BridgeBase)) {
       throw new Error(`Bridge ${bridge_name} does not inherit BridgeBase`)
     }
     if(!this.validateBridge(bridge)) {
@@ -61,7 +61,7 @@ class Broker {
         bridge: this.bridges.get(target),
         type: 'remote'
       })
-    } else if(target.prototype instanceof BridgeBase) {
+    } else if(target instanceof BridgeBase) {
       if(!this.validateBridge(target)) {
         throw new Error(`Bridge ${target_name} does not implement correct functions`)
       }

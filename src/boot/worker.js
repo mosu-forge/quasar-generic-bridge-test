@@ -39,11 +39,6 @@ class WorkerHandler {
     // Returning the promise from the broker here
     return Broker.sendPromise('WorkerRemote', { action: 'getprimes' })
   }
-
-  pingPong() {
-    // Returning the promise from the broker here
-    return Broker.sendPromise('WorkerRemote', { action: 'pingpong' })
-  }
 }
 
 export default ({ Vue }) => {
@@ -59,7 +54,7 @@ export default ({ Vue }) => {
   Vue.prototype.$worker = handler
 
   // Create a webworker and a bridge to it
-  const worker = new Worker('../worker/worker.js', { type: 'module' })
+  const worker = new Worker('../workers/worker', { type: 'module' })
   const bridge = new BridgeWebworker(worker)
 
   // Register a bridge for this webworker
@@ -68,7 +63,9 @@ export default ({ Vue }) => {
   // Register a remote receiver
   Broker.registerReceiver('WorkerRemote', 'MyBridgeForWebWorker')
 
-  // Register another remote receiver over the same bridge to the same worker
-  Broker.registerReceiver('WorkerPingPong', 'MyBridgeForWebWorker')
+  // We can register another receiver across the same bridge to the same webworker
+  // This would allow the webworker to route messages to different parts of code
+  // This named_target is not used, but is shown as an example
+  Broker.registerReceiver('WorkerRemote2', 'MyBridgeForWebWorker')
 
 }

@@ -54,6 +54,15 @@
             <q-item-label caption>Webworker as reciever</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item clickable to="/complex">
+          <q-item-section avatar>
+            <q-icon name="dashboard" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Complex</q-item-label>
+            <q-item-label caption>Complex example</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 

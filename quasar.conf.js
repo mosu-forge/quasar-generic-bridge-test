@@ -10,7 +10,8 @@ module.exports = function (ctx) {
     // --> boot files are part of "main.js"
     boot: [
       'bridge',
-      'worker'
+      'worker',
+      'worker-complex'
     ],
 
     css: [
@@ -75,7 +76,6 @@ module.exports = function (ctx) {
       chainWebpack(cfg) {
         cfg.resolve.alias
           .set('bridge', path.resolve(__dirname, './src/bridge'))
-          .set('workers', path.resolve(__dirname, './src/workers'))
         cfg.plugin('worker').use(WorkerPlugin, [{ globalObject: 'self' }])
       }
     },
