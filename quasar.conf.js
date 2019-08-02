@@ -10,7 +10,7 @@ module.exports = function (ctx) {
     // --> boot files are part of "main.js"
     boot: [
       'bridge',
-      'worker-prime'
+      'worker'
     ],
 
     css: [

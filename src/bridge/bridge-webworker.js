@@ -20,9 +20,29 @@ export default class BridgeWebworker extends BridgeBase {
   }
   receive({ target_name, uid, message, status }) {
     if(uid && status) {
-      Broker.receivePromise(target_name, uid, message, status)
+      if(status === 'RESOLVE') {
+        Broker.resolvePromise(uid, message)
+      } else {
+        Broker.rejectPromise(uid, message)
+      }
+    } else if(uid) {
+      Broker.sendPromise(target_name, message).then(message => {
+        this.target.postMessage({
+          type: 'QUASAR_BRIDGE',
+          uid,
+          message,
+          status: 'RESOLVE'
+        })
+      }).catch(error => {
+        this.target.postMessage({
+          type: 'QUASAR_BRIDGE',
+          uid,
+          message,
+          status: 'REJECT'
+        })
+      })
     } else {
-      Broker.receive(target_name, message)
+      Broker.send(target_name, message)
     }
   }
 }

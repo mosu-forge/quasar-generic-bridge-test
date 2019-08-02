@@ -12,27 +12,27 @@ class Broker {
   /* Bridge Functions */
   registerBridge(bridge_name, bridge) {
     if(this.bridges.has(bridge_name)) {
-      throw new Error('Named bridge already exists')
+      throw new Error(`Bridge ${bridge_name} already exists`)
     }
     if(!bridge.prototype instanceof BridgeBase) {
-      throw new Error('Bridge does not inherit BridgeBase')
+      throw new Error(`Bridge ${bridge_name} does not inherit BridgeBase`)
     }
     if(!this.validateBridge(bridge)) {
-      throw new Error('Bridge does not implement correct functions')
+      throw new Error(`Bridge ${bridge_name} does not implement correct functions`)
     }
     this.bridges.set(bridge_name, bridge)
   }
 
   deregisterBridge(bridge_name) {
     if(!this.bridges.has(target_name)) {
-      throw new Error('Named bridge does not exist')
+      throw new Error(`Bridge ${bridge_name} does not exist`)
     }
     this.bridges.delete(bridge_name)
   }
 
   getBridge(bridge_name) {
     if(!this.bridges.has(bridge_name)) {
-      throw new Error('Named bridge does not exist')
+      throw new Error(`Bridge ${bridge_name} does not exist`)
     }
     return this.bridges.get(bridge_name)
   }
@@ -51,11 +51,11 @@ class Broker {
   /* Receiver Functions */
   registerReceiver(target_name, target) {
     if(this.receivers.has(target_name)) {
-      throw new Error('Named target already exists')
+      throw new Error(`Target ${target_name} already exists`)
     }
     if(typeof target === 'string' || target instanceof String) {
       if(!this.bridges.has(target)) {
-        throw new Error('Named bridge does not exist')
+        throw new Error(`Bridge ${target_name} does not exist`)
       }
       this.receivers.set(target_name, {
         bridge: this.bridges.get(target),
@@ -63,7 +63,7 @@ class Broker {
       })
     } else if(target.prototype instanceof BridgeBase) {
       if(!this.validateBridge(target)) {
-        throw new Error('Bridge does not implement correct functions')
+        throw new Error(`Bridge ${target_name} does not implement correct functions`)
       }
       this.receivers.set(target_name, {
         bridge: target,
@@ -71,7 +71,7 @@ class Broker {
       })
     } else if(target._isVue) { // or if(target instanceof Vue)
       if(!this.validateReceiver(target)) {
-        throw new Error('Receiver does not implement correct functions')
+        throw new Error(`Target ${target_name} does not implement correct functions`)
       }
       this.receivers.set(target_name, {
         target: target,
@@ -79,7 +79,7 @@ class Broker {
       })
     } else {
       if(!this.validateReceiver(target)) {
-        throw new Error('Receiver does not implement correct functions')
+        throw new Error(`Target ${target_name} does not implement correct functions`)
       }
       this.receivers.set(target_name, {
         target,
@@ -90,14 +90,14 @@ class Broker {
 
   deregisterReceiver(target_name) {
     if(!this.receivers.has(target_name)) {
-      throw new Error('Named target does not exist')
+      throw new Error(`Target ${target_name} does not exist`)
     }
     this.receivers.delete(target_name)
   }
 
   getReceiver(target_name) {
     if(!this.receivers.has(target_name)) {
-      throw new Error('Named target does not exist')
+      throw new Error(`Target ${target_name} does not exist`)
     }
     return this.receivers.get(target_name)
   }
@@ -121,9 +121,13 @@ class Broker {
     }
   }
 
+  listReceivers() {
+    return this.receivers.keys()
+  }
+
   send(target_name, message) {
     if(!this.receivers.has(target_name)) {
-      throw new Error('Named target does not exist')
+      throw new Error(`Target ${target_name} does not exist`)
     }
     const receiver = this.receivers.get(target_name)
 
@@ -139,7 +143,7 @@ class Broker {
   sendPromise(target_name, message) {
     return new Promise((resolve, reject) => {
       if(!this.receivers.has(target_name)) {
-        throw new Error('Named target does not exist')
+        throw new Error(`Target ${target_name} does not exist`)
       }
       const receiver = this.receivers.get(target_name)
       const promise_uid = uid()
@@ -155,40 +159,24 @@ class Broker {
     })
   }
 
-  receive(target_name, message) {
-    if(!this.receivers.has(target_name)) {
-      throw new Error('Named target does not exist')
-    }
-    const receiver = this.receivers.get(target_name)
-
-    if(receiver.type === 'remote') {
-      receiver.bridge.send(target_name, null, message)
-    } else if(receiver.type === 'vue') {
-      receiver.target.receive(message)
-    } else if(receiver.type === 'local') {
-      receiver.target.receive(message)
-    }
-  }
-
-  receivePromise(target_name, uid, message, status) {
-    if(!this.receivers.has(target_name)) {
-      throw new Error('Named target does not exist')
-    }
-    if(!this.promises.has(uid)) {
+  resolvePromise(promise_uid, message) {
+    if(!this.promises.has(promise_uid)) {
       throw new Error('Invalid or expired promise')
     }
-    const promise = this.promises.get(uid)
+    const promise = this.promises.get(promise_uid)
 
-    // if(receiver.type === 'remote') {
-    // } else if(receiver.type === 'vue') {
-    // } else if(receiver.type === 'local') {
-    // }
+    promise[0](message) // calls the stored resolve()
+    this.promises.delete(promise_uid)
+  }
 
-    if(status === 'RESOLVE') {
-      promise[0](message) // calls the stored resolve()
-    } else {
-      promise[1](message) // calls the stored reject()
+  rejectPromise(promise_uid, message) {
+    if(!this.promises.has(promise_uid)) {
+      throw new Error('Invalid or expired promise')
     }
+    const promise = this.promises.get(promise_uid)
+
+    promise[1](message) // calls the stored reject()
+    this.promises.delete(promise_uid)
   }
 }
 
